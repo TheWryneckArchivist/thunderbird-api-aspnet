@@ -1,0 +1,25 @@
+name: api-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    env:
+      NUGET_FEED_URL: ${{ secrets.NUGET_FEED_URL }}
+      NUGET_FEED_USERNAME: ${{ secrets.NUGET_FEED_USERNAME }}
+      NUGET_FEED_TOKEN: ${{ secrets.NUGET_FEED_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore Thunderbird.Platform.slnx --configfile nuget.config
+      - name: Build
+        run: dotnet build Thunderbird.Platform.slnx --no-restore -c Release
+      - name: Test
+        run: dotnet test Thunderbird.Platform.slnx --no-build -c Release

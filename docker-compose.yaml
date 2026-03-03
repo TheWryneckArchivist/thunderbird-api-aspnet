@@ -1,0 +1,61 @@
+services:
+  thunderbird-api:
+    build:
+      context: .
+      dockerfile: src/Thunderbird.Api/Dockerfile
+    container_name: thunderbird-api
+    environment:
+      ASPNETCORE_URLS: http://+:5001
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=thunderbird;Username=thunderbird;Password=thunderbird
+      ConnectionStrings__Redis: redis:6379
+      Rabbit__Host: rabbitmq
+      Rabbit__Username: guest
+      Rabbit__Password: guest
+      Auth__Issuer: thunderbird.local
+      Auth__Audience: thunderbird-clients
+      Auth__SigningKey: dev-signing-key-change-me
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    ports:
+      - "5001:5001"
+
+  envoy:
+    image: envoyproxy/envoy:v1.32-latest
+    container_name: thunderbird-envoy
+    command: ["envoy", "-c", "/etc/envoy/envoy.yaml"]
+    volumes:
+      - ./infra/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    depends_on:
+      - thunderbird-api
+    ports:
+      - "8080:8080"
+
+  postgres:
+    image: postgres:16
+    container_name: thunderbird-postgres
+    environment:
+      POSTGRES_USER: thunderbird
+      POSTGRES_PASSWORD: thunderbird
+      POSTGRES_DB: thunderbird
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: thunderbird-redis
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: thunderbird-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  pgdata:

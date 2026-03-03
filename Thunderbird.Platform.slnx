@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Thunderbird.Api/Thunderbird.Api.csproj" />
+    <Project Path="src/Thunderbird.GameRules/Thunderbird.GameRules.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Thunderbird.Api.Tests/Thunderbird.Api.Tests.csproj" />
+  </Folder>
+</Solution>
