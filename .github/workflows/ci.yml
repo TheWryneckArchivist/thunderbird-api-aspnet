@@ -14,11 +14,26 @@ jobs:
       NUGET_FEED_TOKEN: ${{ secrets.NUGET_FEED_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout contracts repo
+        run: git clone --depth 1 https://github.com/TheWryneckArchivist/thunderbird-contracts.git ../thunderbird-contracts
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
       - name: Restore
-        run: dotnet restore Thunderbird.Platform.slnx --configfile nuget.config
+        run: |
+          if [ -n "$NUGET_FEED_URL" ] && [ -n "$NUGET_FEED_USERNAME" ] && [ -n "$NUGET_FEED_TOKEN" ]; then
+            dotnet restore Thunderbird.Platform.slnx --configfile nuget.config
+          else
+            printf '%s\n' \
+              '<?xml version="1.0" encoding="utf-8"?>' \
+              '<configuration>' \
+              '  <packageSources>' \
+              '    <clear />' \
+              '    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />' \
+              '  </packageSources>' \
+              '</configuration>' > /tmp/nuget-public.config
+            dotnet restore Thunderbird.Platform.slnx --configfile /tmp/nuget-public.config
+          fi
       - name: Build
         run: dotnet build Thunderbird.Platform.slnx --no-restore -c Release
       - name: Test
