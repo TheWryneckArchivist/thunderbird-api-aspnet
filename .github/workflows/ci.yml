@@ -22,7 +22,16 @@ jobs:
           if [ -n "$NUGET_FEED_URL" ] && [ -n "$NUGET_FEED_USERNAME" ] && [ -n "$NUGET_FEED_TOKEN" ]; then
             dotnet restore Thunderbird.Platform.slnx --configfile nuget.config
           else
-            dotnet restore Thunderbird.Platform.slnx
+            cat > /tmp/nuget-public.config <<'EOF'
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <packageSources>
+                <clear />
+                <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+              </packageSources>
+            </configuration>
+            EOF
+            dotnet restore Thunderbird.Platform.slnx --configfile /tmp/nuget-public.config
           fi
       - name: Build
         run: dotnet build Thunderbird.Platform.slnx --no-restore -c Release
