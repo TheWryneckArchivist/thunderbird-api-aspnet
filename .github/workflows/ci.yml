@@ -13,7 +13,7 @@ jobs:
       NUGET_FEED_USERNAME: ${{ secrets.NUGET_FEED_USERNAME }}
       NUGET_FEED_TOKEN: ${{ secrets.NUGET_FEED_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Checkout contracts repo
         run: git clone --depth 1 https://github.com/TheWryneckArchivist/thunderbird-contracts.git ../thunderbird-contracts
       - uses: actions/setup-dotnet@v4
